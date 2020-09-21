@@ -18,8 +18,15 @@ if(isset($_GET['points'])) {
 }
 
 //print_r([$x, $y, $seed, $points]);
-
-require_once("includes/autoload.php");
+//use \App;
+//print_r([__LINE__,
+//__FILE__,
+//__DIR__,
+//__FUNCTION__,
+//__CLASS__,
+//__TRAIT__,
+//__METHOD__,
+//__NAMESPACE__]);
 
 ?>
 <html>
@@ -37,6 +44,7 @@ require_once("includes/autoload.php");
             <input type="submit" value="Draw map">
         </form>
         <?php
+            require_once("includes/autoload.php");
             $map = new Map($x, $y, $seed);
             $map->renderMap();
         ?>

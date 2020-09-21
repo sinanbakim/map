@@ -1,15 +1,16 @@
 <?php
 
+//namespace App;
+
 class Map {
     private $biomMap = Array();
     public $delayMap = Array();
     public $stops = Array();
     public $beeLines = Array();
-    public $shortPaths = Array();
-    public $fastPaths = Array();
+    public $shortestPaths = Array();
     public $allPairs = Array();
     public $allPairPaths = Array();
-    public $debug;
+    public $allPairPathCosts = Array();
     private $x, $y;
 
     function __construct($x, $y, $seed) {
@@ -152,7 +153,7 @@ class Map {
         return array_values($validNeighbors);
     }
 
-    private function findAllPaths($path, $end) {
+    private function findAllPaths($pairID, $path, $end) {
         $neighbors = Array();
         $currentPathPosition = $path[count($path) - 1];
         $neighbors = $this->getNeighbors($currentPathPosition);
@@ -161,17 +162,32 @@ class Map {
             $nextStepPath = $path;
             array_push($nextStepPath, $neighbor);
             if($neighbor[0] == $end[0] && $neighbor[1] == $end[1]) {
-                array_push($this->allPairPaths, $nextStepPath);
+                array_push($this->allPairPaths[$pairID], $nextStepPath);
+                $finishedPathCost = 0;
+                foreach($nextStepPath as $finishedPathField) {
+                    $finishedPathCost += $this->delayMap[$finishedPathField[0]][$finishedPathField[1]];
+                }
+                array_push($this->allPairPathCosts[$pairID], $finishedPathCost);
+                if(empty($this->shortestPaths[$pairID]['costs'])) {
+                    $this->shortestPaths[$pairID]['costs'] = $finishedPathCost;
+                    $this->shortestPaths[$pairID]['path'] = $nextStepPath;
+                }
+                if($this->shortestPaths[$pairID]['costs'] > $finishedPathCost) {
+                    $this->shortestPaths[$pairID]['costs'] = $finishedPathCost;
+                    $this->shortestPaths[$pairID]['path'] = $nextStepPath;
+                }
             } else {
-                $this->findAllPaths($nextStepPath, $end);
+                $this->findAllPaths($pairID, $nextStepPath, $end);
             }
         }
     }
 
-    public function findShortesPath($pair) {
+    public function findshortestPath($pairID, $pair) {
         $start = $pair[0];
         $end = $pair[1];
-        $this->findAllPaths([0 => $start], $end);
+
+        $this->findAllPaths($pairID, [0 => $start], $end);
+
     }
 
     public function setStops($stops) {
@@ -190,9 +206,11 @@ class Map {
     }
 
     public function calcutatePaths() {
-        foreach($this->allPairs as $key => $value) {
-            $this->findShortesPath($this->allPairs[0]);
-            //$this->findShortesPath($key, $value);
+        foreach($this->allPairs as $pairID => $pair) {
+            array_push($this->allPairPaths, Array());
+            array_push($this->allPairPathCosts, Array());
+            array_push($this->shortestPaths, Array());
+            $this->findshortestPath($pairID, $pair);
         }
     }
 
@@ -206,6 +224,10 @@ class Map {
                 echo '</div>';
             }
         echo '</div>';
+    }
+
+    public function getValues() {
+        echo json_encode($this);
     }
 }
 ?>

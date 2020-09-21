@@ -1,4 +1,5 @@
 var data = {};
+var responseData = {};
 
 $(document).ready(function(){
     data.seed = $('#seed').val();
@@ -16,11 +17,12 @@ $(document).ready(function(){
     });
 
     $('#reset').on('click', function() {
-        data.points.forEach(function(item, index) {
-            $('#' + item).css("outline", "none");
-            $('#' + item).css("outline-offset", "none");
-            $('#' + item).html("");
-        });
+        // data.points.forEach(function(item, index) {
+        //     $('#' + item).css("outline", "none");
+        //     $('#' + item).css("outline-offset", "none");
+        //     $('#' + item).html("");
+        // });
+        $('.cell').css("outline", "none").css("outline-offset", "none").html("");
         data.points = [];
     });
 
@@ -31,9 +33,15 @@ $(document).ready(function(){
             async: true,
             data: "data="+JSON.stringify(data),
             success: function(response) {
-                $('#result').html("<pre>"+response+"</pre>");
+                // $('#result').html("<pre>"+response+"</pre>");
                 //console.log(JSON.parse(response));
-                console.log(response);
+                // console.log(response);
+                responseData = JSON.parse(response);
+                responseData.shortestPaths.forEach(function(item, index) {
+                    item.path.forEach(function(item, index) {
+                        $('.row:eq(' + item[0] + ') .cell:eq(' + item[1] + ')').html(index);
+                    });
+                });
             }
         });
     });

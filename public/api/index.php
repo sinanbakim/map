@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__DIR__)."/includes/autoload.php");
+require_once("../includes/autoload.php");
 
 if(isset($_POST['data'])) {
     $data = json_decode($_POST['data']);
@@ -8,9 +8,8 @@ if(isset($_POST['data'])) {
         $map->setStops($data->points);
         $map->initAllPairs();
         $map->calculateBeeLines();
-        //$map->calcutatePaths();
-        $map->findShortesPath($map->allPairs[0]);
+        $map->calcutatePaths();
+        $map->getValues();
     }
-    print_r($map);
 }
 ?>
