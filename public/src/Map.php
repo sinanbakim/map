@@ -153,31 +153,32 @@ class Map {
         return array_values($validNeighbors);
     }
 
-    private function findAllPaths($pairID, $path, $end) {
+    private function findAllPaths($pairID, $path, $end, $pathCost) {
         $neighbors = Array();
         $currentPathPosition = $path[count($path) - 1];
         $neighbors = $this->getNeighbors($currentPathPosition);
         $validNeighbors = $this->eliminateCrossingNeighbors($neighbors, $path);
         foreach($validNeighbors as $neighbor) {
             $nextStepPath = $path;
+            foreach($nextStepPath as $finishedPathField) {
+                $finishedPathCost += $this->delayMap[$finishedPathField[0]][$finishedPathField[1]];
+            }
+            array_push($this->allPairPathCosts[$pairID], $finishedPathCost);
+            if(empty($this->shortestPaths[$pairID]['costs'])) {
+                $this->shortestPaths[$pairID]['costs'] = $finishedPathCost;
+                $this->shortestPaths[$pairID]['path'] = $nextStepPath;
+            }
+            if($this->shortestPaths[$pairID]['costs'] > $finishedPathCost) {
+                $this->shortestPaths[$pairID]['costs'] = $finishedPathCost;
+                $this->shortestPaths[$pairID]['path'] = $nextStepPath;
+            }
             array_push($nextStepPath, $neighbor);
             if($neighbor[0] == $end[0] && $neighbor[1] == $end[1]) {
                 array_push($this->allPairPaths[$pairID], $nextStepPath);
                 $finishedPathCost = 0;
-                foreach($nextStepPath as $finishedPathField) {
-                    $finishedPathCost += $this->delayMap[$finishedPathField[0]][$finishedPathField[1]];
-                }
-                array_push($this->allPairPathCosts[$pairID], $finishedPathCost);
-                if(empty($this->shortestPaths[$pairID]['costs'])) {
-                    $this->shortestPaths[$pairID]['costs'] = $finishedPathCost;
-                    $this->shortestPaths[$pairID]['path'] = $nextStepPath;
-                }
-                if($this->shortestPaths[$pairID]['costs'] > $finishedPathCost) {
-                    $this->shortestPaths[$pairID]['costs'] = $finishedPathCost;
-                    $this->shortestPaths[$pairID]['path'] = $nextStepPath;
-                }
+
             } else {
-                $this->findAllPaths($pairID, $nextStepPath, $end);
+                $this->findAllPaths($pairID, $nextStepPath, $end, $pathCost);
             }
         }
     }
@@ -186,7 +187,7 @@ class Map {
         $start = $pair[0];
         $end = $pair[1];
 
-        $this->findAllPaths($pairID, [0 => $start], $end);
+        $this->findAllPaths($pairID, [0 => $start], $end, 0);
 
     }
 
